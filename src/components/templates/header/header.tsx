@@ -62,7 +62,7 @@ export const Header = (props: BoxProps) => {
               About Us
             </h3>
           </a>
-          <a href="/#eventvenue">
+          <a href="/#upcoming-markets">
             <h3
               style={{
                 color: '#fff',

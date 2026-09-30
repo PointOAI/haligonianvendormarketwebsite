@@ -21,7 +21,23 @@ fragment PageLandingFields on PageLanding {
       ...PageProductFields
     }
   }
-  organizers
+  aboutUsHeading
+  aboutUsText
+  upcomingMarketsHeading
+  marketsCollection {
+    items {
+      sys {
+        id
+      }
+      name
+      date
+      time
+      location
+      rsvpText
+      rsvpUrl
+    }
+  }
+  vendorsHeading
 }
 
 query pageLanding($locale: String, $preview: Boolean) {

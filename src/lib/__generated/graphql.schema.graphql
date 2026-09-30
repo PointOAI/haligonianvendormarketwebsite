@@ -1,16 +1,38 @@
+directive @contentSourceMaps(outsidePreview: Boolean) on QUERY
+
+directive @contentfulSchemaMetadata(contentTypePublishedCounters: JSON) on SCHEMA
+
+directive @delegatedResourceLink(contentTypeId: String, field: JSON) on FIELD_DEFINITION | OBJECT
+
+directive @enumMapper(value: JSON) on ENUM_VALUE
+
+directive @featureFlag(featureName: String) on FIELD
+
+directive @fieldResolver(data: JSON, kind: String) on FIELD_DEFINITION
+
+"""
+Indicates exactly one field must be supplied and this field must not be `null`.
+"""
+directive @oneOf on INPUT_OBJECT
+
+directive @timeline(where: TimelineFilterInput!) on QUERY
+
+directive @typeIdentifier(contentTypeId: String) on OBJECT
+
 """Represents a binary file in a space. An asset can be any file type."""
-type Asset {
-  contentType(locale: String): String
+type Asset implements _Node {
+  _id: ID!
+  contentType(locale: String, useFallbackLocale: Boolean): String
   contentfulMetadata: ContentfulMetadata!
-  description(locale: String): String
-  fileName(locale: String): String
-  height(locale: String): Int
+  description(locale: String, useFallbackLocale: Boolean): String
+  fileName(locale: String, useFallbackLocale: Boolean): String
+  height(locale: String, useFallbackLocale: Boolean): Int
   linkedFrom(allowedLocales: [String]): AssetLinkingCollections
-  size(locale: String): Int
+  size(locale: String, useFallbackLocale: Boolean): Int
   sys: Sys!
-  title(locale: String): String
-  url(locale: String, transform: ImageTransformOptions): String
-  width(locale: String): Int
+  title(locale: String, useFallbackLocale: Boolean): String
+  url(locale: String, transform: ImageTransformOptions, useFallbackLocale: Boolean): String
+  width(locale: String, useFallbackLocale: Boolean): Int
 }
 
 type AssetCollection {
@@ -18,6 +40,12 @@ type AssetCollection {
   limit: Int!
   skip: Int!
   total: Int!
+}
+
+type AssetCursorCollection {
+  items: [Asset]!
+  limit: Int!
+  pages: CursorPages!
 }
 
 input AssetFilter {
@@ -90,10 +118,18 @@ input AssetFilter {
 }
 
 type AssetLinkingCollections {
-  componentSeoCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): ComponentSeoCollection
-  entryCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): EntryCollection
-  pageLandingCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): PageLandingCollection
-  pageProductCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): PageProductCollection
+  componentSeoCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): ComponentSeoCollection
+  componentSeoCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): ComponentSeoCursorCollection
+  entryCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): EntryCollection
+  entryCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): EntryCursorCollection
+  marketCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): MarketCollection
+  marketCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): MarketCursorCollection
+  pageAboutCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): PageAboutCollection
+  pageAboutCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): PageAboutCursorCollection
+  pageLandingCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): PageLandingCollection
+  pageLandingCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): PageLandingCursorCollection
+  pageProductCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): PageProductCollection
+  pageProductCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): PageProductCursorCollection
 }
 
 enum AssetOrder {
@@ -120,18 +156,134 @@ enum AssetOrder {
 }
 
 """
-To have SEO-related properties in the pages we render [See type definition](https://app.contentful.com/spaces/a67phq2m6waq/content_types/componentSeo)
+[See type definition](https://app.contentful.com/spaces/zpkn97k5l3y7/content_types/button)
 """
-type ComponentSeo implements Entry {
-  canonicalUrl(locale: String): String
+type Button implements Entry & _Node {
+  _id: ID!
+  buttonLink(locale: String, useFallbackLocale: Boolean): String
+  buttonText(locale: String, useFallbackLocale: Boolean): String
   contentfulMetadata: ContentfulMetadata!
-  internalName(locale: String): String
+  linkedFrom(allowedLocales: [String]): ButtonLinkingCollections
+  sys: Sys!
+}
+
+type ButtonCollection {
+  items: [Button]!
+  limit: Int!
+  skip: Int!
+  total: Int!
+}
+
+type ButtonCursorCollection {
+  items: [Button]!
+  limit: Int!
+  pages: CursorPages!
+}
+
+input ButtonFilter {
+  AND: [ButtonFilter]
+  OR: [ButtonFilter]
+  buttonLink: String
+  buttonLink_contains: String
+  buttonLink_exists: Boolean
+  buttonLink_in: [String]
+  buttonLink_not: String
+  buttonLink_not_contains: String
+  buttonLink_not_in: [String]
+  buttonText: String
+  buttonText_contains: String
+  buttonText_exists: Boolean
+  buttonText_in: [String]
+  buttonText_not: String
+  buttonText_not_contains: String
+  buttonText_not_in: [String]
+  contentfulMetadata: ContentfulMetadataFilter
+  sys: SysFilter
+}
+
+type ButtonLinkingCollections {
+  entryCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): EntryCollection
+  entryCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): EntryCursorCollection
+  pageLandingCollection(limit: Int = 100, locale: String, order: [ButtonLinkingCollectionsPageLandingCollectionOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): PageLandingCollection
+  pageLandingCursorCollection(limit: Int = 100, locale: String, order: [ButtonLinkingCollectionsPageLandingCursorCollectionOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): PageLandingCursorCollection
+}
+
+enum ButtonLinkingCollectionsPageLandingCollectionOrder {
+  aboutUsHeading_ASC
+  aboutUsHeading_DESC
+  heroBannerHeadlineColor_ASC
+  heroBannerHeadlineColor_DESC
+  heroBannerHeadline_ASC
+  heroBannerHeadline_DESC
+  internalName_ASC
+  internalName_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  upcomingMarketsHeading_ASC
+  upcomingMarketsHeading_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+enum ButtonLinkingCollectionsPageLandingCursorCollectionOrder {
+  aboutUsHeading_ASC
+  aboutUsHeading_DESC
+  heroBannerHeadlineColor_ASC
+  heroBannerHeadlineColor_DESC
+  heroBannerHeadline_ASC
+  heroBannerHeadline_DESC
+  internalName_ASC
+  internalName_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  upcomingMarketsHeading_ASC
+  upcomingMarketsHeading_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+enum ButtonOrder {
+  buttonLink_ASC
+  buttonLink_DESC
+  buttonText_ASC
+  buttonText_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+}
+
+"""
+[See type definition](https://app.contentful.com/spaces/zpkn97k5l3y7/content_types/componentSeo)
+"""
+type ComponentSeo implements Entry & _Node {
+  _id: ID!
+  canonicalUrl(locale: String, useFallbackLocale: Boolean): String
+  contentfulMetadata: ContentfulMetadata!
+  internalName(locale: String, useFallbackLocale: Boolean): String
   linkedFrom(allowedLocales: [String]): ComponentSeoLinkingCollections
-  nofollow(locale: String): Boolean
-  noindex(locale: String): Boolean
-  pageDescription(locale: String): String
-  pageTitle(locale: String): String
-  shareImagesCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): AssetCollection
+  nofollow(locale: String, useFallbackLocale: Boolean): Boolean
+  noindex(locale: String, useFallbackLocale: Boolean): Boolean
+  pageDescription(locale: String, useFallbackLocale: Boolean): String
+  pageTitle(locale: String, useFallbackLocale: Boolean): String
+  shareImagesCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): AssetCollection
+  shareImagesCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): AssetCursorCollection
   sys: Sys!
 }
 
@@ -140,6 +292,12 @@ type ComponentSeoCollection {
   limit: Int!
   skip: Int!
   total: Int!
+}
+
+type ComponentSeoCursorCollection {
+  items: [ComponentSeo]!
+  limit: Int!
+  pages: CursorPages!
 }
 
 input ComponentSeoFilter {
@@ -185,9 +343,200 @@ input ComponentSeoFilter {
 }
 
 type ComponentSeoLinkingCollections {
-  entryCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): EntryCollection
-  pageLandingCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): PageLandingCollection
-  pageProductCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): PageProductCollection
+  entryCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): EntryCollection
+  entryCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): EntryCursorCollection
+  pageAboutCollection(limit: Int = 100, locale: String, order: [ComponentSeoLinkingCollectionsPageAboutCollectionOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): PageAboutCollection
+  pageAboutCursorCollection(limit: Int = 100, locale: String, order: [ComponentSeoLinkingCollectionsPageAboutCursorCollectionOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): PageAboutCursorCollection
+  pageLandingCollection(limit: Int = 100, locale: String, order: [ComponentSeoLinkingCollectionsPageLandingCollectionOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): PageLandingCollection
+  pageLandingCursorCollection(limit: Int = 100, locale: String, order: [ComponentSeoLinkingCollectionsPageLandingCursorCollectionOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): PageLandingCursorCollection
+  pageProductCollection(limit: Int = 100, locale: String, order: [ComponentSeoLinkingCollectionsPageProductCollectionOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): PageProductCollection
+  pageProductCursorCollection(limit: Int = 100, locale: String, order: [ComponentSeoLinkingCollectionsPageProductCursorCollectionOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): PageProductCursorCollection
+}
+
+enum ComponentSeoLinkingCollectionsPageAboutCollectionOrder {
+  ctaButtonText_ASC
+  ctaButtonText_DESC
+  ctaButtonUrl_ASC
+  ctaButtonUrl_DESC
+  ctaHeading_ASC
+  ctaHeading_DESC
+  foundedYear_ASC
+  foundedYear_DESC
+  heroBadgeLabel_ASC
+  heroBadgeLabel_DESC
+  heroBadgeTitle_ASC
+  heroBadgeTitle_DESC
+  heroButtonText_ASC
+  heroButtonText_DESC
+  heroButtonUrl_ASC
+  heroButtonUrl_DESC
+  heroEyebrow_ASC
+  heroEyebrow_DESC
+  heroTitle_ASC
+  heroTitle_DESC
+  hostEyebrow_ASC
+  hostEyebrow_DESC
+  hostHeading_ASC
+  hostHeading_DESC
+  internalName_ASC
+  internalName_DESC
+  pastMarketsEyebrow_ASC
+  pastMarketsEyebrow_DESC
+  pastMarketsHeading_ASC
+  pastMarketsHeading_DESC
+  storyEyebrow_ASC
+  storyEyebrow_DESC
+  storyHeading_ASC
+  storyHeading_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  vendorsEyebrow_ASC
+  vendorsEyebrow_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+enum ComponentSeoLinkingCollectionsPageAboutCursorCollectionOrder {
+  ctaButtonText_ASC
+  ctaButtonText_DESC
+  ctaButtonUrl_ASC
+  ctaButtonUrl_DESC
+  ctaHeading_ASC
+  ctaHeading_DESC
+  foundedYear_ASC
+  foundedYear_DESC
+  heroBadgeLabel_ASC
+  heroBadgeLabel_DESC
+  heroBadgeTitle_ASC
+  heroBadgeTitle_DESC
+  heroButtonText_ASC
+  heroButtonText_DESC
+  heroButtonUrl_ASC
+  heroButtonUrl_DESC
+  heroEyebrow_ASC
+  heroEyebrow_DESC
+  heroTitle_ASC
+  heroTitle_DESC
+  hostEyebrow_ASC
+  hostEyebrow_DESC
+  hostHeading_ASC
+  hostHeading_DESC
+  internalName_ASC
+  internalName_DESC
+  pastMarketsEyebrow_ASC
+  pastMarketsEyebrow_DESC
+  pastMarketsHeading_ASC
+  pastMarketsHeading_DESC
+  storyEyebrow_ASC
+  storyEyebrow_DESC
+  storyHeading_ASC
+  storyHeading_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  vendorsEyebrow_ASC
+  vendorsEyebrow_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+enum ComponentSeoLinkingCollectionsPageLandingCollectionOrder {
+  aboutUsHeading_ASC
+  aboutUsHeading_DESC
+  heroBannerHeadlineColor_ASC
+  heroBannerHeadlineColor_DESC
+  heroBannerHeadline_ASC
+  heroBannerHeadline_DESC
+  internalName_ASC
+  internalName_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  upcomingMarketsHeading_ASC
+  upcomingMarketsHeading_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+enum ComponentSeoLinkingCollectionsPageLandingCursorCollectionOrder {
+  aboutUsHeading_ASC
+  aboutUsHeading_DESC
+  heroBannerHeadlineColor_ASC
+  heroBannerHeadlineColor_DESC
+  heroBannerHeadline_ASC
+  heroBannerHeadline_DESC
+  internalName_ASC
+  internalName_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  upcomingMarketsHeading_ASC
+  upcomingMarketsHeading_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+enum ComponentSeoLinkingCollectionsPageProductCollectionOrder {
+  internalName_ASC
+  internalName_DESC
+  link_ASC
+  link_DESC
+  name_ASC
+  name_DESC
+  price_ASC
+  price_DESC
+  slug_ASC
+  slug_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+}
+
+enum ComponentSeoLinkingCollectionsPageProductCursorCollectionOrder {
+  internalName_ASC
+  internalName_DESC
+  link_ASC
+  link_DESC
+  name_ASC
+  name_DESC
+  price_ASC
+  price_DESC
+  slug_ASC
+  slug_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
 }
 
 enum ComponentSeoOrder {
@@ -212,10 +561,26 @@ enum ComponentSeoOrder {
 }
 
 type ContentfulMetadata {
+  concepts: [TaxonomyConcept]!
   tags: [ContentfulTag]!
 }
 
+input ContentfulMetadataConceptsDescendantsFilter {
+  id_contains_all: [String]
+  id_contains_none: [String]
+  id_contains_some: [String]
+}
+
+input ContentfulMetadataConceptsFilter {
+  descendants: ContentfulMetadataConceptsDescendantsFilter
+  id_contains_all: [String]
+  id_contains_none: [String]
+  id_contains_some: [String]
+}
+
 input ContentfulMetadataFilter {
+  concepts: ContentfulMetadataConceptsFilter
+  concepts_exists: Boolean
   tags: ContentfulMetadataTagsFilter
   tags_exists: Boolean
 }
@@ -228,11 +593,16 @@ input ContentfulMetadataTagsFilter {
 
 """
 Represents a tag entity for finding and organizing content easily.
-    Find out more here: https://www.contentful.com/developers/docs/references/content-delivery-api/#/reference/content-tags
+      Find out more here: https://www.contentful.com/developers/docs/references/content-delivery-api/#/reference/content-tags
 """
 type ContentfulTag {
   id: String
   name: String
+}
+
+type CursorPages {
+  next: String
+  prev: String
 }
 
 """
@@ -260,6 +630,12 @@ type EntryCollection {
   total: Int!
 }
 
+type EntryCursorCollection {
+  items: [Entry]!
+  limit: Int!
+  pages: CursorPages!
+}
+
 input EntryFilter {
   AND: [EntryFilter]
   OR: [EntryFilter]
@@ -282,6 +658,7 @@ enum EntryOrder {
 scalar HexColor
 
 enum ImageFormat {
+  """AVIF image format."""
   AVIF
 
   """JPG image format."""
@@ -410,18 +787,721 @@ input ImageTransformOptions {
 }
 
 """
-To have an entry point for the app [See type definition](https://app.contentful.com/spaces/a67phq2m6waq/content_types/pageLanding)
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
-type PageLanding implements Entry {
+scalar JSON
+
+"""
+[See type definition](https://app.contentful.com/spaces/zpkn97k5l3y7/content_types/market)
+"""
+type Market implements Entry & _Node {
+  _id: ID!
   contentfulMetadata: ContentfulMetadata!
-  heroBannerHeadline(locale: String): String
-  heroBannerHeadlineColor(locale: String): String
-  heroBannerImage(locale: String, preview: Boolean): Asset
-  internalName(locale: String): String
-  linkedFrom(allowedLocales: [String]): PageLandingLinkingCollections
-  productsCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): PageLandingProductsCollection
-  seoFields(locale: String, preview: Boolean): ComponentSeo
+  date(locale: String, useFallbackLocale: Boolean): String
+  description(locale: String, useFallbackLocale: Boolean): String
+  linkedFrom(allowedLocales: [String]): MarketLinkingCollections
+  location(locale: String, useFallbackLocale: Boolean): String
+  name(locale: String, useFallbackLocale: Boolean): String
+  photosCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): AssetCollection
+  photosCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): AssetCursorCollection
+  rsvpText(locale: String, useFallbackLocale: Boolean): String
+  rsvpUrl(locale: String, useFallbackLocale: Boolean): String
   sys: Sys!
+  time(locale: String, useFallbackLocale: Boolean): String
+  vendorCount(locale: String, useFallbackLocale: Boolean): String
+}
+
+type MarketCollection {
+  items: [Market]!
+  limit: Int!
+  skip: Int!
+  total: Int!
+}
+
+type MarketCursorCollection {
+  items: [Market]!
+  limit: Int!
+  pages: CursorPages!
+}
+
+input MarketFilter {
+  AND: [MarketFilter]
+  OR: [MarketFilter]
+  contentfulMetadata: ContentfulMetadataFilter
+  date: String
+  date_contains: String
+  date_exists: Boolean
+  date_in: [String]
+  date_not: String
+  date_not_contains: String
+  date_not_in: [String]
+  description: String
+  description_contains: String
+  description_exists: Boolean
+  description_in: [String]
+  description_not: String
+  description_not_contains: String
+  description_not_in: [String]
+  location: String
+  location_contains: String
+  location_exists: Boolean
+  location_in: [String]
+  location_not: String
+  location_not_contains: String
+  location_not_in: [String]
+  name: String
+  name_contains: String
+  name_exists: Boolean
+  name_in: [String]
+  name_not: String
+  name_not_contains: String
+  name_not_in: [String]
+  photosCollection_exists: Boolean
+  rsvpText: String
+  rsvpText_contains: String
+  rsvpText_exists: Boolean
+  rsvpText_in: [String]
+  rsvpText_not: String
+  rsvpText_not_contains: String
+  rsvpText_not_in: [String]
+  rsvpUrl: String
+  rsvpUrl_contains: String
+  rsvpUrl_exists: Boolean
+  rsvpUrl_in: [String]
+  rsvpUrl_not: String
+  rsvpUrl_not_contains: String
+  rsvpUrl_not_in: [String]
+  sys: SysFilter
+  time: String
+  time_contains: String
+  time_exists: Boolean
+  time_in: [String]
+  time_not: String
+  time_not_contains: String
+  time_not_in: [String]
+  vendorCount: String
+  vendorCount_contains: String
+  vendorCount_exists: Boolean
+  vendorCount_in: [String]
+  vendorCount_not: String
+  vendorCount_not_contains: String
+  vendorCount_not_in: [String]
+}
+
+type MarketLinkingCollections {
+  entryCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): EntryCollection
+  entryCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): EntryCursorCollection
+  pageAboutCollection(limit: Int = 100, locale: String, order: [MarketLinkingCollectionsPageAboutCollectionOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): PageAboutCollection
+  pageAboutCursorCollection(limit: Int = 100, locale: String, order: [MarketLinkingCollectionsPageAboutCursorCollectionOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): PageAboutCursorCollection
+  pageLandingCollection(limit: Int = 100, locale: String, order: [MarketLinkingCollectionsPageLandingCollectionOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): PageLandingCollection
+  pageLandingCursorCollection(limit: Int = 100, locale: String, order: [MarketLinkingCollectionsPageLandingCursorCollectionOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): PageLandingCursorCollection
+}
+
+enum MarketLinkingCollectionsPageAboutCollectionOrder {
+  ctaButtonText_ASC
+  ctaButtonText_DESC
+  ctaButtonUrl_ASC
+  ctaButtonUrl_DESC
+  ctaHeading_ASC
+  ctaHeading_DESC
+  foundedYear_ASC
+  foundedYear_DESC
+  heroBadgeLabel_ASC
+  heroBadgeLabel_DESC
+  heroBadgeTitle_ASC
+  heroBadgeTitle_DESC
+  heroButtonText_ASC
+  heroButtonText_DESC
+  heroButtonUrl_ASC
+  heroButtonUrl_DESC
+  heroEyebrow_ASC
+  heroEyebrow_DESC
+  heroTitle_ASC
+  heroTitle_DESC
+  hostEyebrow_ASC
+  hostEyebrow_DESC
+  hostHeading_ASC
+  hostHeading_DESC
+  internalName_ASC
+  internalName_DESC
+  pastMarketsEyebrow_ASC
+  pastMarketsEyebrow_DESC
+  pastMarketsHeading_ASC
+  pastMarketsHeading_DESC
+  storyEyebrow_ASC
+  storyEyebrow_DESC
+  storyHeading_ASC
+  storyHeading_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  vendorsEyebrow_ASC
+  vendorsEyebrow_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+enum MarketLinkingCollectionsPageAboutCursorCollectionOrder {
+  ctaButtonText_ASC
+  ctaButtonText_DESC
+  ctaButtonUrl_ASC
+  ctaButtonUrl_DESC
+  ctaHeading_ASC
+  ctaHeading_DESC
+  foundedYear_ASC
+  foundedYear_DESC
+  heroBadgeLabel_ASC
+  heroBadgeLabel_DESC
+  heroBadgeTitle_ASC
+  heroBadgeTitle_DESC
+  heroButtonText_ASC
+  heroButtonText_DESC
+  heroButtonUrl_ASC
+  heroButtonUrl_DESC
+  heroEyebrow_ASC
+  heroEyebrow_DESC
+  heroTitle_ASC
+  heroTitle_DESC
+  hostEyebrow_ASC
+  hostEyebrow_DESC
+  hostHeading_ASC
+  hostHeading_DESC
+  internalName_ASC
+  internalName_DESC
+  pastMarketsEyebrow_ASC
+  pastMarketsEyebrow_DESC
+  pastMarketsHeading_ASC
+  pastMarketsHeading_DESC
+  storyEyebrow_ASC
+  storyEyebrow_DESC
+  storyHeading_ASC
+  storyHeading_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  vendorsEyebrow_ASC
+  vendorsEyebrow_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+enum MarketLinkingCollectionsPageLandingCollectionOrder {
+  aboutUsHeading_ASC
+  aboutUsHeading_DESC
+  heroBannerHeadlineColor_ASC
+  heroBannerHeadlineColor_DESC
+  heroBannerHeadline_ASC
+  heroBannerHeadline_DESC
+  internalName_ASC
+  internalName_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  upcomingMarketsHeading_ASC
+  upcomingMarketsHeading_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+enum MarketLinkingCollectionsPageLandingCursorCollectionOrder {
+  aboutUsHeading_ASC
+  aboutUsHeading_DESC
+  heroBannerHeadlineColor_ASC
+  heroBannerHeadlineColor_DESC
+  heroBannerHeadline_ASC
+  heroBannerHeadline_DESC
+  internalName_ASC
+  internalName_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  upcomingMarketsHeading_ASC
+  upcomingMarketsHeading_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+enum MarketOrder {
+  date_ASC
+  date_DESC
+  location_ASC
+  location_DESC
+  name_ASC
+  name_DESC
+  rsvpText_ASC
+  rsvpText_DESC
+  rsvpUrl_ASC
+  rsvpUrl_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  time_ASC
+  time_DESC
+  vendorCount_ASC
+  vendorCount_DESC
+}
+
+"""
+[See type definition](https://app.contentful.com/spaces/zpkn97k5l3y7/content_types/pageAbout)
+"""
+type PageAbout implements Entry & _Node {
+  _id: ID!
+  contentfulMetadata: ContentfulMetadata!
+  ctaButtonText(locale: String, useFallbackLocale: Boolean): String
+  ctaButtonUrl(locale: String, useFallbackLocale: Boolean): String
+  ctaHeading(locale: String, useFallbackLocale: Boolean): String
+  ctaText(locale: String, useFallbackLocale: Boolean): String
+  featuredVendorsCollection(limit: Int = 100, locale: String, order: [PageAboutFeaturedVendorsCollectionOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean, where: PageProductFilter): PageAboutFeaturedVendorsCollection
+  featuredVendorsCursorCollection(limit: Int = 100, locale: String, order: [PageAboutFeaturedVendorsCursorCollectionOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean, where: PageProductFilter): PageAboutFeaturedVendorsCursorCollection
+  foundedYear(locale: String, useFallbackLocale: Boolean): String
+  heroBadgeLabel(locale: String, useFallbackLocale: Boolean): String
+  heroBadgeTitle(locale: String, useFallbackLocale: Boolean): String
+  heroButtonText(locale: String, useFallbackLocale: Boolean): String
+  heroButtonUrl(locale: String, useFallbackLocale: Boolean): String
+  heroEyebrow(locale: String, useFallbackLocale: Boolean): String
+  heroImage(locale: String, preview: Boolean, useFallbackLocale: Boolean): Asset
+  heroSecondaryImage(locale: String, preview: Boolean, useFallbackLocale: Boolean): Asset
+  heroSubtitle(locale: String, useFallbackLocale: Boolean): String
+  heroTitle(locale: String, useFallbackLocale: Boolean): String
+  host(locale: String, preview: Boolean, useFallbackLocale: Boolean, where: PageProductFilter): PageProduct
+  hostEyebrow(locale: String, useFallbackLocale: Boolean): String
+  hostHeading(locale: String, useFallbackLocale: Boolean): String
+  internalName(locale: String, useFallbackLocale: Boolean): String
+  linkedFrom(allowedLocales: [String]): PageAboutLinkingCollections
+  pastMarketsCollection(limit: Int = 100, locale: String, order: [PageAboutPastMarketsCollectionOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean, where: MarketFilter): PageAboutPastMarketsCollection
+  pastMarketsCursorCollection(limit: Int = 100, locale: String, order: [PageAboutPastMarketsCursorCollectionOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean, where: MarketFilter): PageAboutPastMarketsCursorCollection
+  pastMarketsEyebrow(locale: String, useFallbackLocale: Boolean): String
+  pastMarketsHeading(locale: String, useFallbackLocale: Boolean): String
+  pastMarketsText(locale: String, useFallbackLocale: Boolean): String
+  seoFields(locale: String, preview: Boolean, useFallbackLocale: Boolean, where: ComponentSeoFilter): ComponentSeo
+  storyEyebrow(locale: String, useFallbackLocale: Boolean): String
+  storyHeading(locale: String, useFallbackLocale: Boolean): String
+  storyText(locale: String, useFallbackLocale: Boolean): String
+  sys: Sys!
+  vendorsEyebrow(locale: String, useFallbackLocale: Boolean): String
+  vendorsHeading(locale: String, useFallbackLocale: Boolean): String
+  vendorsText(locale: String, useFallbackLocale: Boolean): String
+}
+
+type PageAboutCollection {
+  items: [PageAbout]!
+  limit: Int!
+  skip: Int!
+  total: Int!
+}
+
+type PageAboutCursorCollection {
+  items: [PageAbout]!
+  limit: Int!
+  pages: CursorPages!
+}
+
+type PageAboutFeaturedVendorsCollection {
+  items: [PageProduct]!
+  limit: Int!
+  skip: Int!
+  total: Int!
+}
+
+enum PageAboutFeaturedVendorsCollectionOrder {
+  internalName_ASC
+  internalName_DESC
+  link_ASC
+  link_DESC
+  name_ASC
+  name_DESC
+  price_ASC
+  price_DESC
+  slug_ASC
+  slug_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+}
+
+type PageAboutFeaturedVendorsCursorCollection {
+  items: [PageProduct]!
+  limit: Int!
+  pages: CursorPages!
+}
+
+enum PageAboutFeaturedVendorsCursorCollectionOrder {
+  internalName_ASC
+  internalName_DESC
+  link_ASC
+  link_DESC
+  name_ASC
+  name_DESC
+  price_ASC
+  price_DESC
+  slug_ASC
+  slug_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+}
+
+input PageAboutFilter {
+  AND: [PageAboutFilter]
+  OR: [PageAboutFilter]
+  contentfulMetadata: ContentfulMetadataFilter
+  ctaButtonText: String
+  ctaButtonText_contains: String
+  ctaButtonText_exists: Boolean
+  ctaButtonText_in: [String]
+  ctaButtonText_not: String
+  ctaButtonText_not_contains: String
+  ctaButtonText_not_in: [String]
+  ctaButtonUrl: String
+  ctaButtonUrl_contains: String
+  ctaButtonUrl_exists: Boolean
+  ctaButtonUrl_in: [String]
+  ctaButtonUrl_not: String
+  ctaButtonUrl_not_contains: String
+  ctaButtonUrl_not_in: [String]
+  ctaHeading: String
+  ctaHeading_contains: String
+  ctaHeading_exists: Boolean
+  ctaHeading_in: [String]
+  ctaHeading_not: String
+  ctaHeading_not_contains: String
+  ctaHeading_not_in: [String]
+  ctaText: String
+  ctaText_contains: String
+  ctaText_exists: Boolean
+  ctaText_in: [String]
+  ctaText_not: String
+  ctaText_not_contains: String
+  ctaText_not_in: [String]
+  featuredVendors: cfPageProductNestedFilter
+  featuredVendorsCollection_exists: Boolean
+  foundedYear: String
+  foundedYear_contains: String
+  foundedYear_exists: Boolean
+  foundedYear_in: [String]
+  foundedYear_not: String
+  foundedYear_not_contains: String
+  foundedYear_not_in: [String]
+  heroBadgeLabel: String
+  heroBadgeLabel_contains: String
+  heroBadgeLabel_exists: Boolean
+  heroBadgeLabel_in: [String]
+  heroBadgeLabel_not: String
+  heroBadgeLabel_not_contains: String
+  heroBadgeLabel_not_in: [String]
+  heroBadgeTitle: String
+  heroBadgeTitle_contains: String
+  heroBadgeTitle_exists: Boolean
+  heroBadgeTitle_in: [String]
+  heroBadgeTitle_not: String
+  heroBadgeTitle_not_contains: String
+  heroBadgeTitle_not_in: [String]
+  heroButtonText: String
+  heroButtonText_contains: String
+  heroButtonText_exists: Boolean
+  heroButtonText_in: [String]
+  heroButtonText_not: String
+  heroButtonText_not_contains: String
+  heroButtonText_not_in: [String]
+  heroButtonUrl: String
+  heroButtonUrl_contains: String
+  heroButtonUrl_exists: Boolean
+  heroButtonUrl_in: [String]
+  heroButtonUrl_not: String
+  heroButtonUrl_not_contains: String
+  heroButtonUrl_not_in: [String]
+  heroEyebrow: String
+  heroEyebrow_contains: String
+  heroEyebrow_exists: Boolean
+  heroEyebrow_in: [String]
+  heroEyebrow_not: String
+  heroEyebrow_not_contains: String
+  heroEyebrow_not_in: [String]
+  heroImage_exists: Boolean
+  heroSecondaryImage_exists: Boolean
+  heroSubtitle: String
+  heroSubtitle_contains: String
+  heroSubtitle_exists: Boolean
+  heroSubtitle_in: [String]
+  heroSubtitle_not: String
+  heroSubtitle_not_contains: String
+  heroSubtitle_not_in: [String]
+  heroTitle: String
+  heroTitle_contains: String
+  heroTitle_exists: Boolean
+  heroTitle_in: [String]
+  heroTitle_not: String
+  heroTitle_not_contains: String
+  heroTitle_not_in: [String]
+  host: cfPageProductNestedFilter
+  hostEyebrow: String
+  hostEyebrow_contains: String
+  hostEyebrow_exists: Boolean
+  hostEyebrow_in: [String]
+  hostEyebrow_not: String
+  hostEyebrow_not_contains: String
+  hostEyebrow_not_in: [String]
+  hostHeading: String
+  hostHeading_contains: String
+  hostHeading_exists: Boolean
+  hostHeading_in: [String]
+  hostHeading_not: String
+  hostHeading_not_contains: String
+  hostHeading_not_in: [String]
+  host_exists: Boolean
+  internalName: String
+  internalName_contains: String
+  internalName_exists: Boolean
+  internalName_in: [String]
+  internalName_not: String
+  internalName_not_contains: String
+  internalName_not_in: [String]
+  pastMarkets: cfMarketNestedFilter
+  pastMarketsCollection_exists: Boolean
+  pastMarketsEyebrow: String
+  pastMarketsEyebrow_contains: String
+  pastMarketsEyebrow_exists: Boolean
+  pastMarketsEyebrow_in: [String]
+  pastMarketsEyebrow_not: String
+  pastMarketsEyebrow_not_contains: String
+  pastMarketsEyebrow_not_in: [String]
+  pastMarketsHeading: String
+  pastMarketsHeading_contains: String
+  pastMarketsHeading_exists: Boolean
+  pastMarketsHeading_in: [String]
+  pastMarketsHeading_not: String
+  pastMarketsHeading_not_contains: String
+  pastMarketsHeading_not_in: [String]
+  pastMarketsText: String
+  pastMarketsText_contains: String
+  pastMarketsText_exists: Boolean
+  pastMarketsText_in: [String]
+  pastMarketsText_not: String
+  pastMarketsText_not_contains: String
+  pastMarketsText_not_in: [String]
+  seoFields: cfComponentSeoNestedFilter
+  seoFields_exists: Boolean
+  storyEyebrow: String
+  storyEyebrow_contains: String
+  storyEyebrow_exists: Boolean
+  storyEyebrow_in: [String]
+  storyEyebrow_not: String
+  storyEyebrow_not_contains: String
+  storyEyebrow_not_in: [String]
+  storyHeading: String
+  storyHeading_contains: String
+  storyHeading_exists: Boolean
+  storyHeading_in: [String]
+  storyHeading_not: String
+  storyHeading_not_contains: String
+  storyHeading_not_in: [String]
+  storyText: String
+  storyText_contains: String
+  storyText_exists: Boolean
+  storyText_in: [String]
+  storyText_not: String
+  storyText_not_contains: String
+  storyText_not_in: [String]
+  sys: SysFilter
+  vendorsEyebrow: String
+  vendorsEyebrow_contains: String
+  vendorsEyebrow_exists: Boolean
+  vendorsEyebrow_in: [String]
+  vendorsEyebrow_not: String
+  vendorsEyebrow_not_contains: String
+  vendorsEyebrow_not_in: [String]
+  vendorsHeading: String
+  vendorsHeading_contains: String
+  vendorsHeading_exists: Boolean
+  vendorsHeading_in: [String]
+  vendorsHeading_not: String
+  vendorsHeading_not_contains: String
+  vendorsHeading_not_in: [String]
+  vendorsText: String
+  vendorsText_contains: String
+  vendorsText_exists: Boolean
+  vendorsText_in: [String]
+  vendorsText_not: String
+  vendorsText_not_contains: String
+  vendorsText_not_in: [String]
+}
+
+type PageAboutLinkingCollections {
+  entryCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): EntryCollection
+  entryCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): EntryCursorCollection
+}
+
+enum PageAboutOrder {
+  ctaButtonText_ASC
+  ctaButtonText_DESC
+  ctaButtonUrl_ASC
+  ctaButtonUrl_DESC
+  ctaHeading_ASC
+  ctaHeading_DESC
+  foundedYear_ASC
+  foundedYear_DESC
+  heroBadgeLabel_ASC
+  heroBadgeLabel_DESC
+  heroBadgeTitle_ASC
+  heroBadgeTitle_DESC
+  heroButtonText_ASC
+  heroButtonText_DESC
+  heroButtonUrl_ASC
+  heroButtonUrl_DESC
+  heroEyebrow_ASC
+  heroEyebrow_DESC
+  heroTitle_ASC
+  heroTitle_DESC
+  hostEyebrow_ASC
+  hostEyebrow_DESC
+  hostHeading_ASC
+  hostHeading_DESC
+  internalName_ASC
+  internalName_DESC
+  pastMarketsEyebrow_ASC
+  pastMarketsEyebrow_DESC
+  pastMarketsHeading_ASC
+  pastMarketsHeading_DESC
+  storyEyebrow_ASC
+  storyEyebrow_DESC
+  storyHeading_ASC
+  storyHeading_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  vendorsEyebrow_ASC
+  vendorsEyebrow_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+type PageAboutPastMarketsCollection {
+  items: [Market]!
+  limit: Int!
+  skip: Int!
+  total: Int!
+}
+
+enum PageAboutPastMarketsCollectionOrder {
+  date_ASC
+  date_DESC
+  location_ASC
+  location_DESC
+  name_ASC
+  name_DESC
+  rsvpText_ASC
+  rsvpText_DESC
+  rsvpUrl_ASC
+  rsvpUrl_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  time_ASC
+  time_DESC
+  vendorCount_ASC
+  vendorCount_DESC
+}
+
+type PageAboutPastMarketsCursorCollection {
+  items: [Market]!
+  limit: Int!
+  pages: CursorPages!
+}
+
+enum PageAboutPastMarketsCursorCollectionOrder {
+  date_ASC
+  date_DESC
+  location_ASC
+  location_DESC
+  name_ASC
+  name_DESC
+  rsvpText_ASC
+  rsvpText_DESC
+  rsvpUrl_ASC
+  rsvpUrl_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  time_ASC
+  time_DESC
+  vendorCount_ASC
+  vendorCount_DESC
+}
+
+"""
+[See type definition](https://app.contentful.com/spaces/zpkn97k5l3y7/content_types/pageLanding)
+"""
+type PageLanding implements Entry & _Node {
+  _id: ID!
+  aboutUsHeading(locale: String, useFallbackLocale: Boolean): String
+  aboutUsText(locale: String, useFallbackLocale: Boolean): String
+  buttons(locale: String, preview: Boolean, useFallbackLocale: Boolean, where: ButtonFilter): Button
+  contentfulMetadata: ContentfulMetadata!
+  heroBannerHeadline(locale: String, useFallbackLocale: Boolean): String
+  heroBannerHeadlineColor(locale: String, useFallbackLocale: Boolean): String
+  heroBannerImage(locale: String, preview: Boolean, useFallbackLocale: Boolean): Asset
+  internalName(locale: String, useFallbackLocale: Boolean): String
+  linkedFrom(allowedLocales: [String]): PageLandingLinkingCollections
+  marketsCollection(limit: Int = 100, locale: String, order: [PageLandingMarketsCollectionOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean, where: MarketFilter): PageLandingMarketsCollection
+  marketsCursorCollection(limit: Int = 100, locale: String, order: [PageLandingMarketsCursorCollectionOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean, where: MarketFilter): PageLandingMarketsCursorCollection
+  organizersCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): PageLandingOrganizersCollection
+  organizersCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): PageLandingOrganizersCursorCollection
+  productsCollection(limit: Int = 100, locale: String, order: [PageLandingProductsCollectionOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean, where: PageProductFilter): PageLandingProductsCollection
+  productsCursorCollection(limit: Int = 100, locale: String, order: [PageLandingProductsCursorCollectionOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean, where: PageProductFilter): PageLandingProductsCursorCollection
+  seoFields(locale: String, preview: Boolean, useFallbackLocale: Boolean, where: ComponentSeoFilter): ComponentSeo
+  sys: Sys!
+  upcomingMarketsHeading(locale: String, useFallbackLocale: Boolean): String
+  vendorsHeading(locale: String, useFallbackLocale: Boolean): String
 }
 
 type PageLandingCollection {
@@ -431,9 +1511,31 @@ type PageLandingCollection {
   total: Int!
 }
 
+type PageLandingCursorCollection {
+  items: [PageLanding]!
+  limit: Int!
+  pages: CursorPages!
+}
+
 input PageLandingFilter {
   AND: [PageLandingFilter]
   OR: [PageLandingFilter]
+  aboutUsHeading: String
+  aboutUsHeading_contains: String
+  aboutUsHeading_exists: Boolean
+  aboutUsHeading_in: [String]
+  aboutUsHeading_not: String
+  aboutUsHeading_not_contains: String
+  aboutUsHeading_not_in: [String]
+  aboutUsText: String
+  aboutUsText_contains: String
+  aboutUsText_exists: Boolean
+  aboutUsText_in: [String]
+  aboutUsText_not: String
+  aboutUsText_not_contains: String
+  aboutUsText_not_in: [String]
+  buttons: cfButtonNestedFilter
+  buttons_exists: Boolean
   contentfulMetadata: ContentfulMetadataFilter
   heroBannerHeadline: String
   heroBannerHeadlineColor: String
@@ -457,18 +1559,101 @@ input PageLandingFilter {
   internalName_not: String
   internalName_not_contains: String
   internalName_not_in: [String]
+  markets: cfMarketNestedFilter
+  marketsCollection_exists: Boolean
+  organizersCollection_exists: Boolean
   products: cfPageProductNestedFilter
   productsCollection_exists: Boolean
   seoFields: cfComponentSeoNestedFilter
   seoFields_exists: Boolean
   sys: SysFilter
+  upcomingMarketsHeading: String
+  upcomingMarketsHeading_contains: String
+  upcomingMarketsHeading_exists: Boolean
+  upcomingMarketsHeading_in: [String]
+  upcomingMarketsHeading_not: String
+  upcomingMarketsHeading_not_contains: String
+  upcomingMarketsHeading_not_in: [String]
+  vendorsHeading: String
+  vendorsHeading_contains: String
+  vendorsHeading_exists: Boolean
+  vendorsHeading_in: [String]
+  vendorsHeading_not: String
+  vendorsHeading_not_contains: String
+  vendorsHeading_not_in: [String]
 }
 
 type PageLandingLinkingCollections {
-  entryCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): EntryCollection
+  entryCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): EntryCollection
+  entryCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): EntryCursorCollection
+}
+
+type PageLandingMarketsCollection {
+  items: [Market]!
+  limit: Int!
+  skip: Int!
+  total: Int!
+}
+
+enum PageLandingMarketsCollectionOrder {
+  date_ASC
+  date_DESC
+  location_ASC
+  location_DESC
+  name_ASC
+  name_DESC
+  rsvpText_ASC
+  rsvpText_DESC
+  rsvpUrl_ASC
+  rsvpUrl_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  time_ASC
+  time_DESC
+  vendorCount_ASC
+  vendorCount_DESC
+}
+
+type PageLandingMarketsCursorCollection {
+  items: [Market]!
+  limit: Int!
+  pages: CursorPages!
+}
+
+enum PageLandingMarketsCursorCollectionOrder {
+  date_ASC
+  date_DESC
+  location_ASC
+  location_DESC
+  name_ASC
+  name_DESC
+  rsvpText_ASC
+  rsvpText_DESC
+  rsvpUrl_ASC
+  rsvpUrl_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  time_ASC
+  time_DESC
+  vendorCount_ASC
+  vendorCount_DESC
 }
 
 enum PageLandingOrder {
+  aboutUsHeading_ASC
+  aboutUsHeading_DESC
   heroBannerHeadlineColor_ASC
   heroBannerHeadlineColor_DESC
   heroBannerHeadline_ASC
@@ -483,6 +1668,23 @@ enum PageLandingOrder {
   sys_publishedAt_DESC
   sys_publishedVersion_ASC
   sys_publishedVersion_DESC
+  upcomingMarketsHeading_ASC
+  upcomingMarketsHeading_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+type PageLandingOrganizersCollection {
+  items: [Entry]!
+  limit: Int!
+  skip: Int!
+  total: Int!
+}
+
+type PageLandingOrganizersCursorCollection {
+  items: [Entry]!
+  limit: Int!
+  pages: CursorPages!
 }
 
 type PageLandingProductsCollection {
@@ -492,22 +1694,75 @@ type PageLandingProductsCollection {
   total: Int!
 }
 
+enum PageLandingProductsCollectionOrder {
+  internalName_ASC
+  internalName_DESC
+  link_ASC
+  link_DESC
+  name_ASC
+  name_DESC
+  price_ASC
+  price_DESC
+  slug_ASC
+  slug_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+}
+
+type PageLandingProductsCursorCollection {
+  items: [PageProduct]!
+  limit: Int!
+  pages: CursorPages!
+}
+
+enum PageLandingProductsCursorCollectionOrder {
+  internalName_ASC
+  internalName_DESC
+  link_ASC
+  link_DESC
+  name_ASC
+  name_DESC
+  price_ASC
+  price_DESC
+  slug_ASC
+  slug_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+}
+
 """
-To output data for a single product [See type definition](https://app.contentful.com/spaces/a67phq2m6waq/content_types/pageProduct)
+[See type definition](https://app.contentful.com/spaces/zpkn97k5l3y7/content_types/pageProduct)
 """
-type PageProduct implements Entry {
+type PageProduct implements Entry & _Node {
+  _id: ID!
   contentfulMetadata: ContentfulMetadata!
-  description(locale: String): String
-  featuredProductImage(locale: String, preview: Boolean): Asset
-  internalName(locale: String): String
+  description(locale: String, useFallbackLocale: Boolean): String
+  featuredProductImage(locale: String, preview: Boolean, useFallbackLocale: Boolean): Asset
+  internalName(locale: String, useFallbackLocale: Boolean): String
+  link(locale: String, useFallbackLocale: Boolean): String
   linkedFrom(allowedLocales: [String]): PageProductLinkingCollections
-  name(locale: String): String
-  price(locale: String): Float
-  productImagesCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): AssetCollection
-  relatedProductsCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): PageProductRelatedProductsCollection
-  seoFields(locale: String, preview: Boolean): ComponentSeo
-  slug(locale: String): String
+  name(locale: String, useFallbackLocale: Boolean): String
+  price(locale: String, useFallbackLocale: Boolean): Float
+  productImagesCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): AssetCollection
+  productImagesCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): AssetCursorCollection
+  relatedProductsCollection(limit: Int = 100, locale: String, order: [PageProductRelatedProductsCollectionOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean, where: PageProductFilter): PageProductRelatedProductsCollection
+  relatedProductsCursorCollection(limit: Int = 100, locale: String, order: [PageProductRelatedProductsCursorCollectionOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean, where: PageProductFilter): PageProductRelatedProductsCursorCollection
+  seoFields(locale: String, preview: Boolean, useFallbackLocale: Boolean, where: ComponentSeoFilter): ComponentSeo
+  slug(locale: String, useFallbackLocale: Boolean): String
   sys: Sys!
+  typeOfVendor(locale: String, useFallbackLocale: Boolean): [String]
 }
 
 type PageProductCollection {
@@ -515,6 +1770,12 @@ type PageProductCollection {
   limit: Int!
   skip: Int!
   total: Int!
+}
+
+type PageProductCursorCollection {
+  items: [PageProduct]!
+  limit: Int!
+  pages: CursorPages!
 }
 
 input PageProductFilter {
@@ -536,6 +1797,13 @@ input PageProductFilter {
   internalName_not: String
   internalName_not_contains: String
   internalName_not_in: [String]
+  link: String
+  link_contains: String
+  link_exists: Boolean
+  link_in: [String]
+  link_not: String
+  link_not_contains: String
+  link_not_in: [String]
   name: String
   name_contains: String
   name_exists: Boolean
@@ -565,17 +1833,214 @@ input PageProductFilter {
   slug_not_contains: String
   slug_not_in: [String]
   sys: SysFilter
+  typeOfVendor_contains_all: [String]
+  typeOfVendor_contains_none: [String]
+  typeOfVendor_contains_some: [String]
+  typeOfVendor_exists: Boolean
 }
 
 type PageProductLinkingCollections {
-  entryCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): EntryCollection
-  pageLandingCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): PageLandingCollection
-  pageProductCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0): PageProductCollection
+  entryCollection(limit: Int = 100, locale: String, preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): EntryCollection
+  entryCursorCollection(limit: Int = 100, locale: String, pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): EntryCursorCollection
+  pageAboutCollection(limit: Int = 100, locale: String, order: [PageProductLinkingCollectionsPageAboutCollectionOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): PageAboutCollection
+  pageAboutCursorCollection(limit: Int = 100, locale: String, order: [PageProductLinkingCollectionsPageAboutCursorCollectionOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): PageAboutCursorCollection
+  pageLandingCollection(limit: Int = 100, locale: String, order: [PageProductLinkingCollectionsPageLandingCollectionOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): PageLandingCollection
+  pageLandingCursorCollection(limit: Int = 100, locale: String, order: [PageProductLinkingCollectionsPageLandingCursorCollectionOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): PageLandingCursorCollection
+  pageProductCollection(limit: Int = 100, locale: String, order: [PageProductLinkingCollectionsPageProductCollectionOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean): PageProductCollection
+  pageProductCursorCollection(limit: Int = 100, locale: String, order: [PageProductLinkingCollectionsPageProductCursorCollectionOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean): PageProductCursorCollection
+}
+
+enum PageProductLinkingCollectionsPageAboutCollectionOrder {
+  ctaButtonText_ASC
+  ctaButtonText_DESC
+  ctaButtonUrl_ASC
+  ctaButtonUrl_DESC
+  ctaHeading_ASC
+  ctaHeading_DESC
+  foundedYear_ASC
+  foundedYear_DESC
+  heroBadgeLabel_ASC
+  heroBadgeLabel_DESC
+  heroBadgeTitle_ASC
+  heroBadgeTitle_DESC
+  heroButtonText_ASC
+  heroButtonText_DESC
+  heroButtonUrl_ASC
+  heroButtonUrl_DESC
+  heroEyebrow_ASC
+  heroEyebrow_DESC
+  heroTitle_ASC
+  heroTitle_DESC
+  hostEyebrow_ASC
+  hostEyebrow_DESC
+  hostHeading_ASC
+  hostHeading_DESC
+  internalName_ASC
+  internalName_DESC
+  pastMarketsEyebrow_ASC
+  pastMarketsEyebrow_DESC
+  pastMarketsHeading_ASC
+  pastMarketsHeading_DESC
+  storyEyebrow_ASC
+  storyEyebrow_DESC
+  storyHeading_ASC
+  storyHeading_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  vendorsEyebrow_ASC
+  vendorsEyebrow_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+enum PageProductLinkingCollectionsPageAboutCursorCollectionOrder {
+  ctaButtonText_ASC
+  ctaButtonText_DESC
+  ctaButtonUrl_ASC
+  ctaButtonUrl_DESC
+  ctaHeading_ASC
+  ctaHeading_DESC
+  foundedYear_ASC
+  foundedYear_DESC
+  heroBadgeLabel_ASC
+  heroBadgeLabel_DESC
+  heroBadgeTitle_ASC
+  heroBadgeTitle_DESC
+  heroButtonText_ASC
+  heroButtonText_DESC
+  heroButtonUrl_ASC
+  heroButtonUrl_DESC
+  heroEyebrow_ASC
+  heroEyebrow_DESC
+  heroTitle_ASC
+  heroTitle_DESC
+  hostEyebrow_ASC
+  hostEyebrow_DESC
+  hostHeading_ASC
+  hostHeading_DESC
+  internalName_ASC
+  internalName_DESC
+  pastMarketsEyebrow_ASC
+  pastMarketsEyebrow_DESC
+  pastMarketsHeading_ASC
+  pastMarketsHeading_DESC
+  storyEyebrow_ASC
+  storyEyebrow_DESC
+  storyHeading_ASC
+  storyHeading_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  vendorsEyebrow_ASC
+  vendorsEyebrow_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+enum PageProductLinkingCollectionsPageLandingCollectionOrder {
+  aboutUsHeading_ASC
+  aboutUsHeading_DESC
+  heroBannerHeadlineColor_ASC
+  heroBannerHeadlineColor_DESC
+  heroBannerHeadline_ASC
+  heroBannerHeadline_DESC
+  internalName_ASC
+  internalName_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  upcomingMarketsHeading_ASC
+  upcomingMarketsHeading_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+enum PageProductLinkingCollectionsPageLandingCursorCollectionOrder {
+  aboutUsHeading_ASC
+  aboutUsHeading_DESC
+  heroBannerHeadlineColor_ASC
+  heroBannerHeadlineColor_DESC
+  heroBannerHeadline_ASC
+  heroBannerHeadline_DESC
+  internalName_ASC
+  internalName_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+  upcomingMarketsHeading_ASC
+  upcomingMarketsHeading_DESC
+  vendorsHeading_ASC
+  vendorsHeading_DESC
+}
+
+enum PageProductLinkingCollectionsPageProductCollectionOrder {
+  internalName_ASC
+  internalName_DESC
+  link_ASC
+  link_DESC
+  name_ASC
+  name_DESC
+  price_ASC
+  price_DESC
+  slug_ASC
+  slug_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+}
+
+enum PageProductLinkingCollectionsPageProductCursorCollectionOrder {
+  internalName_ASC
+  internalName_DESC
+  link_ASC
+  link_DESC
+  name_ASC
+  name_DESC
+  price_ASC
+  price_DESC
+  slug_ASC
+  slug_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
 }
 
 enum PageProductOrder {
   internalName_ASC
   internalName_DESC
+  link_ASC
+  link_DESC
   name_ASC
   name_DESC
   price_ASC
@@ -599,27 +2064,94 @@ type PageProductRelatedProductsCollection {
   total: Int!
 }
 
+enum PageProductRelatedProductsCollectionOrder {
+  internalName_ASC
+  internalName_DESC
+  link_ASC
+  link_DESC
+  name_ASC
+  name_DESC
+  price_ASC
+  price_DESC
+  slug_ASC
+  slug_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+}
+
+type PageProductRelatedProductsCursorCollection {
+  items: [PageProduct]!
+  limit: Int!
+  pages: CursorPages!
+}
+
+enum PageProductRelatedProductsCursorCollectionOrder {
+  internalName_ASC
+  internalName_DESC
+  link_ASC
+  link_DESC
+  name_ASC
+  name_DESC
+  price_ASC
+  price_DESC
+  slug_ASC
+  slug_DESC
+  sys_firstPublishedAt_ASC
+  sys_firstPublishedAt_DESC
+  sys_id_ASC
+  sys_id_DESC
+  sys_publishedAt_ASC
+  sys_publishedAt_DESC
+  sys_publishedVersion_ASC
+  sys_publishedVersion_DESC
+}
+
 """
 The 'Quality' type represents quality as whole numeric values between `1` and `100`.
 """
 scalar Quality
 
 type Query {
-  asset(id: String!, locale: String, preview: Boolean): Asset
-  assetCollection(limit: Int = 100, locale: String, order: [AssetOrder], preview: Boolean, skip: Int = 0, where: AssetFilter): AssetCollection
-  componentSeo(id: String!, locale: String, preview: Boolean): ComponentSeo
-  componentSeoCollection(limit: Int = 100, locale: String, order: [ComponentSeoOrder], preview: Boolean, skip: Int = 0, where: ComponentSeoFilter): ComponentSeoCollection
-  entryCollection(limit: Int = 100, locale: String, order: [EntryOrder], preview: Boolean, skip: Int = 0, where: EntryFilter): EntryCollection
-  pageLanding(id: String!, locale: String, preview: Boolean): PageLanding
-  pageLandingCollection(limit: Int = 100, locale: String, order: [PageLandingOrder], preview: Boolean, skip: Int = 0, where: PageLandingFilter): PageLandingCollection
-  pageProduct(id: String!, locale: String, preview: Boolean): PageProduct
-  pageProductCollection(limit: Int = 100, locale: String, order: [PageProductOrder], preview: Boolean, skip: Int = 0, where: PageProductFilter): PageProductCollection
+  _node(id: ID!, locale: String, preview: Boolean, useFallbackLocale: Boolean): _Node
+  _nodes(ids: [ID!]!, locale: String, preview: Boolean, useFallbackLocale: Boolean): [_Node]!
+  asset(id: String!, locale: String, preview: Boolean, useFallbackLocale: Boolean): Asset
+  assetCollection(limit: Int = 100, locale: String, order: [AssetOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean, where: AssetFilter): AssetCollection
+  assetCursorCollection(limit: Int = 100, locale: String, order: [AssetOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean, where: AssetFilter): AssetCursorCollection
+  button(id: String!, locale: String, preview: Boolean, useFallbackLocale: Boolean): Button
+  buttonCollection(limit: Int = 100, locale: String, order: [ButtonOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean, where: ButtonFilter): ButtonCollection
+  buttonCursorCollection(limit: Int = 100, locale: String, order: [ButtonOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean, where: ButtonFilter): ButtonCursorCollection
+  componentSeo(id: String!, locale: String, preview: Boolean, useFallbackLocale: Boolean): ComponentSeo
+  componentSeoCollection(limit: Int = 100, locale: String, order: [ComponentSeoOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean, where: ComponentSeoFilter): ComponentSeoCollection
+  componentSeoCursorCollection(limit: Int = 100, locale: String, order: [ComponentSeoOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean, where: ComponentSeoFilter): ComponentSeoCursorCollection
+  entryCollection(limit: Int = 100, locale: String, order: [EntryOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean, where: EntryFilter): EntryCollection
+  entryCursorCollection(limit: Int = 100, locale: String, order: [EntryOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean, where: EntryFilter): EntryCursorCollection
+  market(id: String!, locale: String, preview: Boolean, useFallbackLocale: Boolean): Market
+  marketCollection(limit: Int = 100, locale: String, order: [MarketOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean, where: MarketFilter): MarketCollection
+  marketCursorCollection(limit: Int = 100, locale: String, order: [MarketOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean, where: MarketFilter): MarketCursorCollection
+  pageAbout(id: String!, locale: String, preview: Boolean, useFallbackLocale: Boolean): PageAbout
+  pageAboutCollection(limit: Int = 100, locale: String, order: [PageAboutOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean, where: PageAboutFilter): PageAboutCollection
+  pageAboutCursorCollection(limit: Int = 100, locale: String, order: [PageAboutOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean, where: PageAboutFilter): PageAboutCursorCollection
+  pageLanding(id: String!, locale: String, preview: Boolean, useFallbackLocale: Boolean): PageLanding
+  pageLandingCollection(limit: Int = 100, locale: String, order: [PageLandingOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean, where: PageLandingFilter): PageLandingCollection
+  pageLandingCursorCollection(limit: Int = 100, locale: String, order: [PageLandingOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean, where: PageLandingFilter): PageLandingCursorCollection
+  pageProduct(id: String!, locale: String, preview: Boolean, useFallbackLocale: Boolean): PageProduct
+  pageProductCollection(limit: Int = 100, locale: String, order: [PageProductOrder], preview: Boolean, skip: Int = 0, useFallbackLocale: Boolean, where: PageProductFilter): PageProductCollection
+  pageProductCursorCollection(limit: Int = 100, locale: String, order: [PageProductOrder], pageNext: String, pagePrev: String, preview: Boolean, useFallbackLocale: Boolean, where: PageProductFilter): PageProductCursorCollection
 }
 
 type Sys {
   environmentId: String!
   firstPublishedAt: DateTime
   id: String!
+
+  """The locale that was requested."""
+  locale: String
   publishedAt: DateTime
   publishedVersion: Int
   spaceId: String!
@@ -660,6 +2192,47 @@ input SysFilter {
   publishedVersion_lte: Float
   publishedVersion_not: Float
   publishedVersion_not_in: [Float]
+}
+
+"""
+Represents a taxonomy concept entity for finding and organizing content easily.
+        Find out more here: https://www.contentful.com/developers/docs/references/content-delivery-api/#/reference/content-concepts
+"""
+type TaxonomyConcept {
+  id: String
+}
+
+input TimelineFilterInput {
+  """Preview content starting from a given release date"""
+  release_lte: String
+
+  """Preview content starting from a given timestamp"""
+  timestamp_lte: DateTime
+}
+
+interface _Node {
+  _id: ID!
+}
+
+input cfButtonNestedFilter {
+  AND: [cfButtonNestedFilter]
+  OR: [cfButtonNestedFilter]
+  buttonLink: String
+  buttonLink_contains: String
+  buttonLink_exists: Boolean
+  buttonLink_in: [String]
+  buttonLink_not: String
+  buttonLink_not_contains: String
+  buttonLink_not_in: [String]
+  buttonText: String
+  buttonText_contains: String
+  buttonText_exists: Boolean
+  buttonText_in: [String]
+  buttonText_not: String
+  buttonText_not_contains: String
+  buttonText_not_in: [String]
+  contentfulMetadata: ContentfulMetadataFilter
+  sys: SysFilter
 }
 
 input cfComponentSeoNestedFilter {
@@ -704,6 +2277,70 @@ input cfComponentSeoNestedFilter {
   sys: SysFilter
 }
 
+input cfMarketNestedFilter {
+  AND: [cfMarketNestedFilter]
+  OR: [cfMarketNestedFilter]
+  contentfulMetadata: ContentfulMetadataFilter
+  date: String
+  date_contains: String
+  date_exists: Boolean
+  date_in: [String]
+  date_not: String
+  date_not_contains: String
+  date_not_in: [String]
+  description: String
+  description_contains: String
+  description_exists: Boolean
+  description_in: [String]
+  description_not: String
+  description_not_contains: String
+  description_not_in: [String]
+  location: String
+  location_contains: String
+  location_exists: Boolean
+  location_in: [String]
+  location_not: String
+  location_not_contains: String
+  location_not_in: [String]
+  name: String
+  name_contains: String
+  name_exists: Boolean
+  name_in: [String]
+  name_not: String
+  name_not_contains: String
+  name_not_in: [String]
+  photosCollection_exists: Boolean
+  rsvpText: String
+  rsvpText_contains: String
+  rsvpText_exists: Boolean
+  rsvpText_in: [String]
+  rsvpText_not: String
+  rsvpText_not_contains: String
+  rsvpText_not_in: [String]
+  rsvpUrl: String
+  rsvpUrl_contains: String
+  rsvpUrl_exists: Boolean
+  rsvpUrl_in: [String]
+  rsvpUrl_not: String
+  rsvpUrl_not_contains: String
+  rsvpUrl_not_in: [String]
+  sys: SysFilter
+  time: String
+  time_contains: String
+  time_exists: Boolean
+  time_in: [String]
+  time_not: String
+  time_not_contains: String
+  time_not_in: [String]
+  vendorCount: String
+  vendorCount_contains: String
+  vendorCount_exists: Boolean
+  vendorCount_in: [String]
+  vendorCount_not: String
+  vendorCount_not_contains: String
+  vendorCount_not_in: [String]
+}
+
 input cfPageProductNestedFilter {
   AND: [cfPageProductNestedFilter]
   OR: [cfPageProductNestedFilter]
@@ -723,6 +2360,13 @@ input cfPageProductNestedFilter {
   internalName_not: String
   internalName_not_contains: String
   internalName_not_in: [String]
+  link: String
+  link_contains: String
+  link_exists: Boolean
+  link_in: [String]
+  link_not: String
+  link_not_contains: String
+  link_not_in: [String]
   name: String
   name_contains: String
   name_exists: Boolean
@@ -750,4 +2394,8 @@ input cfPageProductNestedFilter {
   slug_not_contains: String
   slug_not_in: [String]
   sys: SysFilter
+  typeOfVendor_contains_all: [String]
+  typeOfVendor_contains_none: [String]
+  typeOfVendor_contains_some: [String]
+  typeOfVendor_exists: Boolean
 }
