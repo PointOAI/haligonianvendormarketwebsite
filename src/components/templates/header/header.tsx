@@ -55,7 +55,7 @@ export const Header = (props: BoxProps) => {
           <a href="/#aboutus">
             <h3
               style={{
-                color: '#fff',
+                color: '#ffffff',
                 fontSize: '16px',
                 cursor: 'pointer',
               }}>
